@@ -213,6 +213,12 @@ while (bandera) {
             break
 
         case 4: // Prestar
+
+            if (libros.length === 0 || usuarios.length === 0){
+                alert("🧙‍♂️ No podemos hacer magia. 🪄 Para poder prestar un libro necesitarás, primero, ingresar libros en la biblioteca y registrar al menos un usuario.")
+                break
+            }
+            
             let usuarioEncontrado = buscarUsuario()
             if (!usuarioEncontrado) {
                 break
@@ -260,6 +266,7 @@ while (bandera) {
             let fechaPrestamo = new Date()
             let fechaVencimiento = new Date()
 
+            //Modificar para que diga +7 luego del testeo
             fechaVencimiento.setDate(fechaVencimiento.getDate() - 7)
 
             // Investigar cómo hacer toLocaleDateString("es-AR")
@@ -299,6 +306,11 @@ while (bandera) {
 
         case 5: // Devolver
 
+            if (prestamos.length === 0) {
+                alert("⚠️ Para devolver un libro, primero debés prestarlo. Es cuestión de sentido común... 🧉")
+                break
+            } 
+            
             let usuarioDevolver = Number(prompt("🪪 Ingresá el número del socio que desea devolver o renovar su préstamo"))
 
             let devolver = prestamos.filter(libroParaDevolver => libroParaDevolver.Usuario === usuarioDevolver)
@@ -306,10 +318,10 @@ while (bandera) {
             let mensajeDevolver = `Los libros disponibles para devolver son:`
 
             for (let i = 0; i < devolver.length; i++) {
-                mensajeDevolver += `\n 🔑 Código: ${devolver[i].Código} \n📌 Usuario: ${devolver[i].Nombre} (DNI ${devolver[i].Usuario} \n📕 Titulo: "${devolver[i].Título}" de ${devolver[i].Autor} \n📅 Vencimiento: ${devolver[i].Vencimiento} \n______________________________________________________`
+                mensajeDevolver += `\n______________________________________________________\n 🔑 Código: ${devolver[i].Código} \n📌 Usuario: ${devolver[i].Nombre} (DNI ${devolver[i].Usuario} \n📕 Titulo: "${devolver[i].Título}" de ${devolver[i].Autor} \n📅 Vencimiento: ${devolver[i].Vencimiento}`
             }
 
-            mensajeDevolver += `\n \n👉👉 Ingresá el código del libro que querés devolver.`
+            mensajeDevolver += `\n______________________________________________________\n \n👉👉 Ingresá el código del libro que querés devolver.`
 
             let itemDevolver = prompt(mensajeDevolver)
 
@@ -324,13 +336,16 @@ while (bandera) {
             }
 
             console.log(prestamos)
+
+            // sumar de nuevo el libro al inventario 
             break
 
         case 6: // Ver préstamos
-            if (!prestamos) {
-                alert("Por el momento, nada que mostrar aquí. No hay libros prestados a domicilio.")
+            if (prestamos.length === 0) {
+                alert("Por el momento, nada que mostrar aquí 👀. No hay libros prestados a domicilio. Vuelva más tarde.")
+                break
             } else {
-
+                
                 let mensajePrestamos = `📚 Los libros prestados son:\n`
 
                 for (let i = 0; i < prestamos.length; i++) {
@@ -356,7 +371,11 @@ while (bandera) {
                 mensajeAtrasados += `\n📌 Usuario: ${atrasados[i].Nombre} (DNI ${atrasados[i].Usuario} \n📕 Titulo: "${atrasados[i].Título}" de ${atrasados[i].Autor} \n📅 Vencimiento: ${atrasados[i].Vencimiento} \n______________________________________________________`
             }
 
-            alert(mensajeAtrasados)
+            if (atrasados.length != 0){
+                alert(mensajeAtrasados)
+            } else {
+                alert("👮 De momento todo está en orden. No hay préstamos atrasados. Pero nos mantendremos vigilantes...")
+            }
 
             break
 
