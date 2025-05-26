@@ -35,7 +35,7 @@ function validacionDeISBN(valor, piso = 10, techo = 13) {
     return { Valor: valor, esValido: esValido }
 }
 
-function buscarUsuario() {
+function buscarUsuarioParaPrestar() {
 
     for (let intentos = 3; intentos > 0; intentos--) {
         buscarPorDNI = Number(prompt("👤Ingresá el número de DNI del usuario"))
@@ -56,8 +56,29 @@ function buscarUsuario() {
     return null
 }
 
+function buscarUsuarioParaDevolver() {
+
+    for (let intentos = 3; intentos > 0; intentos--) {
+        buscarPorDNI = Number(prompt("🪪 Ingresá el número del socio que desea devolver o renovar su préstamo"))
+    
+
+        let usuario = usuarios.find(u => u.DNI === buscarPorDNI)
+
+        if (usuario) {
+            alert(`➡️ Usuario encontrado: ${usuario.Nombre} ${usuario.Apellido} - DNI ${usuario.DNI}`)
+            return usuario.DNI
+        } else {
+            alert("🤷‍♂️ Usuario no encontrado, intenta nuevamente.")
+        }
+    }
+
+    alert("❌ Has agotado los intentos. Volverás al menú principal.")
+    return null
+}
+
+
 // Hago el menú
-const menu = `Bienvenidx. ¿Qué deseás hacer hoy? 
+const menu = `👋 Bienvenidx. ¿Qué deseás hacer hoy? 
     \n 1- Nueva locación
     \n 2- Alta de nuevo usuario
     \n 3- Ingreso de nuevo libro
@@ -82,21 +103,23 @@ while (bandera) {
             bandera = false
             break
 
-        case 1:
-            let mensaje = prompt("¿Cómo se llaman la nueva locación?")
-
+        case 1: // Crear lugar de guardado
+            let mensaje = prompt("🏛️ ¿Cómo se llaman la nueva locación?")
+            
+            // acá hay que hacer que no deje guardar en blanco
+            
             crearLocacion(mensaje)
 
-            alert(`Se ha incorporado "${mensaje}" como una nueva locación. A partir de ahora, podrás guardar libros ahí.`)
+            alert(`✅ Se ha incorporado "${mensaje}" como una nueva locación. A partir de ahora, podrás guardar libros ahí.`)
 
             break
 
         case 2: // Crear usuario
-            let apellido = prompt("Ingresá el apellido del nuevo usuario").toUpperCase()
+            let apellido = prompt("👉 Ingresá el apellido del nuevo usuario").toUpperCase()
+            // Acá si alguien cancela, el uppercase genera error. Solo se me ocurre esto, por no quiero tampoco validar un espacio vacío: apellido = apellido ? apellido.toUpperCase() : "" 
+            let nombre = prompt("👉 Ingresá su nombre de pila").toUpperCase()
 
-            let nombre = prompt("Ingresá su nombre de pila").toUpperCase()
-
-            let mensajeDNI = "Ingresá su número de DNI"
+            let mensajeDNI = "👉 Ingresá su número de DNI"
             let seleccionDNI
             let esDNIValido
             let dni
@@ -121,7 +144,7 @@ while (bandera) {
 
             agregarUsuario(apellido, nombre, dni)
 
-            alert(`Se ha agregado a ${nombre} ${apellido} al registro de usuarios. Usaremos su número de DNI como número de socio: ${dni}`)
+            alert(`✅ Se ha agregado a ${nombre} ${apellido} al registro de usuarios. Usaremos su número de DNI como número de socio: ${dni}`)
 
             console.log(usuarios)
 
@@ -134,7 +157,7 @@ while (bandera) {
                 break
             }
 
-            let mensajeISBN = "Ingresá el código ISBN del libro (es un número entre 10 y 13 digitos)"
+            let mensajeISBN = "👉 Ingresá el código ISBN del libro (es un número entre 10 y 13 digitos)"
             let seleccionISBN
             let esISBNValido
             let isbn
@@ -160,11 +183,11 @@ while (bandera) {
             console.log(ejemplar)
 
             if (ejemplar) {
-                let libroDuplicado = Number(prompt(`Ya tenemos un libro con ese ISBN. Corrobore los datos ingresados: "${ejemplar.Título}" de ${ejemplar.Autor} (${ejemplar.ISBN}). Cantidad existente: ${ejemplar.Ejemplares} \n\n 👉¿Qué desea hacer? \n\n 1- Agregar un nuevo ejemplar de este libro al catálogo \n 2- Cancelar`))
+                let libroDuplicado = Number(prompt(`🚨 Ya tenemos un libro con ese ISBN. Corroborá los datos ingresados: "${ejemplar.Título}" de ${ejemplar.Autor} (${ejemplar.ISBN}). Cantidad existente: ${ejemplar.Ejemplares} \n\n 👉¿Qué deseás hacer? \n\n 1- Agregar un nuevo ejemplar de este libro al catálogo \n 2- Cancelar`))
 
                 if (libroDuplicado == 1) {
                     ejemplar.Ejemplares++
-                    alert(`💾CAMBIOS GUARDADOS \n Acabás de sumar un ejemplar al siguiente libro: \n-ISBN: ${ejemplar.ISBN}\n-Título: ${ejemplar.Título}\n-Autor: ${ejemplar.Autor}\n-Número actualizado de ejemplares: ${ejemplar.Ejemplares}`)
+                    alert(`💾CAMBIOS GUARDADOS \n ✅ Acabás de sumar un ejemplar al siguiente libro: \n-ISBN: ${ejemplar.ISBN}\n-Título: ${ejemplar.Título}\n-Autor: ${ejemplar.Autor}\n-Número actualizado de ejemplares: ${ejemplar.Ejemplares}`)
 
                 } else if (libroDuplicado == 2) {
                     alert("❌ OPERACIÓN CANCELADA")
@@ -173,15 +196,15 @@ while (bandera) {
                 break
             }
 
-            let titulo = prompt("Ingresá el título de la obra").toUpperCase()
-            let autor = prompt("Indicá el nombre completo del autor").toUpperCase()
-            let cantidad = Number(prompt("Cantidad de nuevos ejemplares a ingresar"))
+            let titulo = prompt("➡️Ingresá el título de la obra").toUpperCase()
+            let autor = prompt("🧑‍💼Indicá el nombre completo del autor").toUpperCase()
+            let cantidad = Number(prompt("🧮 Cantidad de nuevos ejemplares a ingresar"))
             if (!cantidad || isNaN(cantidad) || cantidad <= 0) {
                 cantidad = 1 // Asigna por defecto el valor 1 si el prompt queda vacío o es un valor no numérico
             }
+console.log(cantidad)
 
-
-            let mensajeLocaciones = `Ingrese la locación en la que se encuentra físicamente el libro utilizando el número de la opción correspondiente:\n`
+            let mensajeLocaciones = `🏛️ Seleccioná la locación en la que se encuentra guardado físicamente el libro, utilizando para ello el número de la opción correspondiente:\n`
             for (let i = 0; i < locaciones.length; i++) {
                 mensajeLocaciones += `\n ${locaciones.indexOf(locaciones[i])} - ${locaciones[i]}`
             }
@@ -208,7 +231,7 @@ while (bandera) {
 
             agregarLibro()
 
-            alert(`Se ha agregado ${cantidad} ejemplar de ${titulo} de ${autor} a tu biblioteca en ${locacion}. Podrás prestarlo cuando quieras.`)
+            alert(`✅ Se ha agregado ${cantidad} ejemplar de ${titulo} de ${autor} a tu biblioteca en ${locacion}. Podrás prestarlo cuando quieras.`)
             console.log(libros)
             break
 
@@ -219,12 +242,13 @@ while (bandera) {
                 break
             }
             
-            let usuarioEncontrado = buscarUsuario()
+            let usuarioEncontrado = buscarUsuarioParaPrestar()
+
             if (!usuarioEncontrado) {
                 break
             }
             //Acá no entiendo el scope. Si las variables están encapsuladas dentro de case no tendria que haber problema con que tengan el mismo nombre que en otro lugar. Sin embargo, no se ejecuta nada si lo hago así
-            let mensajeISBN2 = "Ingresá el código ISBN del libro (es un número entre 10 y 13 digitos)"
+            let mensajeISBN2 = "➡️ Ingresá el código ISBN del libro (es un número entre 10 y 13 digitos)"
             let seleccionISBN2
             let esISBNValido2
             let isbn2
@@ -252,25 +276,26 @@ while (bandera) {
             console.log(libro)
 
             if (!libro) {
-                alert("❌ No tenemos un libro con ese ISBN. Corrobore los datos ingresados.")
+                alert("❌ No tenemos un libro con ese ISBN. Corroborá los datos ingresados.")
                 break
-            } else if (libro.ejemplar = 0) {
+            } else if (libro.Ejemplares === 0) {
                 alert("❌ Lo sentimos. Este libro no se encuentra actualmente disponible.")
                 break
             }
 
             alert(`📕 Libro con ISBN ${libro.ISBN} encontrado:\n-Título: ${libro.Título}\n-Autor: ${libro.Autor}\n-Ejemplares: ${libro.Ejemplares}`)
 
+            console.log(libro)
+
             prestamoNro++
 
             let fechaPrestamo = new Date()
             let fechaVencimiento = new Date()
 
-            //Modificar para que diga +7 luego del testeo
-            fechaVencimiento.setDate(fechaVencimiento.getDate() - 7)
+            fechaVencimiento.setDate(fechaVencimiento.getDate() + 7)
 
-            // Investigar cómo hacer toLocaleDateString("es-AR")
-
+           // Investigar cómo hacer toLocaleDateString("es-AR")
+           console.log(libro.Ejemplares)
             function prestarLibro() {
                 prestamos.push({
                     Código: prestamoNro,
@@ -278,6 +303,7 @@ while (bandera) {
                     Nombre: `${usuarioEncontrado.Nombre} ${usuarioEncontrado.Apellido}`,
                     Título: libro.Título,
                     Autor: libro.Autor,
+                    ISBN: libro.ISBN,
                     Fecha: fechaPrestamo,
                     Vencimiento: fechaVencimiento
                 })
@@ -296,7 +322,7 @@ while (bandera) {
                     \n🔴 VENCIMIENTO: ${fechaVencimiento}`)
 
             } else {
-                alert("No quedan ejemplares en la biblioteca. El libro que usted busca se encuentra prestado")
+                alert("😫 No quedan ejemplares en la biblioteca. El libro que usted buscás se encuentra prestado.")
                 break
             }
 
@@ -305,20 +331,24 @@ while (bandera) {
             break
 
         case 5: // Devolver
-
+        //falta poner alerta si el valor ingresado es nulo
             if (prestamos.length === 0) {
                 alert("⚠️ Para devolver un libro, primero debés prestarlo. Es cuestión de sentido común... 🧉")
                 break
             } 
+                    
+            let usuarioDevolver = buscarUsuarioParaDevolver()
             
-            let usuarioDevolver = Number(prompt("🪪 Ingresá el número del socio que desea devolver o renovar su préstamo"))
+            if (!usuarioDevolver) {
+                break
+            }
 
             let devolver = prestamos.filter(libroParaDevolver => libroParaDevolver.Usuario === usuarioDevolver)
 
-            let mensajeDevolver = `Los libros disponibles para devolver son:`
+            let mensajeDevolver = `📋 Los libros disponibles para devolver son:`
 
             for (let i = 0; i < devolver.length; i++) {
-                mensajeDevolver += `\n______________________________________________________\n 🔑 Código: ${devolver[i].Código} \n📌 Usuario: ${devolver[i].Nombre} (DNI ${devolver[i].Usuario} \n📕 Titulo: "${devolver[i].Título}" de ${devolver[i].Autor} \n📅 Vencimiento: ${devolver[i].Vencimiento}`
+                mensajeDevolver += `\n______________________________________________________\n 🔑 Código de préstamo: ${devolver[i].Código} \n📌 Usuario: ${devolver[i].Nombre} (DNI ${devolver[i].Usuario} \n📕 Titulo: "${devolver[i].Título}" de ${devolver[i].Autor} \n📅 Vencimiento: ${devolver[i].Vencimiento} ${devolver[i].ISBN}`
             }
 
             mensajeDevolver += `\n______________________________________________________\n \n👉👉 Ingresá el código del libro que querés devolver.`
@@ -328,21 +358,29 @@ while (bandera) {
             let indiceDevolver = prestamos.findIndex(item => item.Código === Number(itemDevolver))
 
             console.log(indiceDevolver)
+            console.log(libros)
 
             if (indiceDevolver !== -1) {
+                
+                let encontrarLibro = libros.findIndex(devolverEjemplar => devolverEjemplar.ISBN === Number(prestamos[indiceDevolver].ISBN))
+                libros[encontrarLibro].Ejemplares++
+                
                 prestamos.splice(indiceDevolver, 1)
-
-                alert("¡Libro devuelto! ✅")
+                
+                console.log(libros)
+                alert(`✅ ¡Libro devuelto!`)
             }
+            
 
-            console.log(prestamos)
+
+
 
             // sumar de nuevo el libro al inventario 
             break
 
         case 6: // Ver préstamos
             if (prestamos.length === 0) {
-                alert("Por el momento, nada que mostrar aquí 👀. No hay libros prestados a domicilio. Vuelva más tarde.")
+                alert("Por el momento, nada que mostrar aquí 👀. No hay libros prestados a domicilio. Volvé más tarde.")
                 break
             } else {
                 
@@ -365,7 +403,7 @@ while (bandera) {
 
             let atrasados = prestamos.filter(atrasado => new Date(atrasado.Vencimiento) < hoy)
 
-            let mensajeAtrasados = `Los siguientes libros deberían haber vuelto ya a la biblioteca:\n______________________________________________________`
+            let mensajeAtrasados = `📋Los siguientes libros deberían haber vuelto ya a la biblioteca:\n______________________________________________________`
 
             for (let i = 0; i < atrasados.length; i++) {
                 mensajeAtrasados += `\n📌 Usuario: ${atrasados[i].Nombre} (DNI ${atrasados[i].Usuario} \n📕 Titulo: "${atrasados[i].Título}" de ${atrasados[i].Autor} \n📅 Vencimiento: ${atrasados[i].Vencimiento} \n______________________________________________________`
@@ -381,7 +419,7 @@ while (bandera) {
 
         default:
 
-            alert('La opción que seleccionaste no está disponible. Volvé a internarlo.')
+            alert('❌ La opción que seleccionaste no está disponible. Volvé a internarlo... (si te animás 👻)')
 
             break
     }
