@@ -7,7 +7,6 @@ let prestamoNro = 0
 
 function crearLocacion(locacion) {
     locaciones.push(locacion)
-    console.log(locaciones)
 }
 
 function validacionDeEleccionConArray(valor, array) {
@@ -39,13 +38,11 @@ function buscarUsuarioParaPrestar() {
 
     for (let intentos = 3; intentos > 0; intentos--) {
         buscarPorDNI = Number(prompt("👤Ingresá el número de DNI del usuario"))
-        console.log(buscarPorDNI)
 
         let usuario = usuarios.find(u => u.DNI === buscarPorDNI)
 
         if (usuario) {
             alert(`➡️ Estás a punto de prestarle un libro a ${usuario.Nombre} ${usuario.Apellido} - DNI ${usuario.DNI}`)
-            console.log(usuario)
             return usuario
         } else {
             alert("🤷‍♂️ DNI no encontrado, intenta nuevamente.")
@@ -60,7 +57,7 @@ function buscarUsuarioParaDevolver() {
 
     for (let intentos = 3; intentos > 0; intentos--) {
         buscarPorDNI = Number(prompt("🪪 Ingresá el número del socio que desea devolver o renovar su préstamo"))
-    
+
 
         let usuario = usuarios.find(u => u.DNI === buscarPorDNI)
 
@@ -76,6 +73,60 @@ function buscarUsuarioParaDevolver() {
     return null
 }
 
+//Funcion para asegurarme de que no dejan vacío ni completan con espacio en blanco un campo obligatorio de tipo texto
+function obtenerTextoValido(msj) {
+
+    let noVacio
+
+    do {
+        noVacio = prompt(msj)
+
+        if (noVacio === null) {
+            alert("🚪 Operación cancelada.")
+
+            return null// Espero que evite dar error o entrar en un bucle infinito si alguien cacela
+        }
+
+        noVacio = noVacio.trim() // Elimina espacios innecesarios
+
+        if (noVacio === "") {
+            alert("🫷 Debés ingresar texto antes de continuar.")
+        }
+
+    } while (noVacio === "")
+
+    if (typeof noVacio === "string") { return noVacio.toUpperCase() }
+}
+
+// Funcion validadora del DNI
+function obtenerDocumentoValido() {
+    let mensajeDNI = "👉 Ingresá su número de DNI"
+    let seleccionDNI
+    let esDNIValido
+    let dni
+
+    do {
+        seleccionDNI = prompt(mensajeDNI)
+
+        if (seleccionDNI === null) {
+            alert("🚪 Operación cancelada.")
+            return null// Espero que evite dar error o entrar en un bucle infinito si alguien cacela
+        }
+
+        let resultadoDNI = validacionDeEleccionSinArray(seleccionDNI, 10_000_000, 99_999_999)
+
+        esDNIValido = resultadoDNI.esValido
+
+        dni = Number(resultadoDNI.Valor)
+
+        if (!esDNIValido) {
+            alert("❌ Lo sentimos. No ingresaste un valor válido.")
+        }
+
+    } while (!esDNIValido)
+
+    return dni
+}
 
 // Hago el menú
 const menu = `👋 Bienvenidx. ¿Qué deseás hacer hoy? 
@@ -105,9 +156,9 @@ while (bandera) {
 
         case 1: // Crear lugar de guardado
             let mensaje = prompt("🏛️ ¿Cómo se llaman la nueva locación?")
-            
+
             // acá hay que hacer que no deje guardar en blanco
-            
+
             crearLocacion(mensaje)
 
             alert(`✅ Se ha incorporado "${mensaje}" como una nueva locación. A partir de ahora, podrás guardar libros ahí.`)
@@ -115,38 +166,31 @@ while (bandera) {
             break
 
         case 2: // Crear usuario
-            let apellido = prompt("👉 Ingresá el apellido del nuevo usuario").toUpperCase()
-            // Acá si alguien cancela, el uppercase genera error. Solo se me ocurre esto, por no quiero tampoco validar un espacio vacío: apellido = apellido ? apellido.toUpperCase() : "" 
-            let nombre = prompt("👉 Ingresá su nombre de pila").toUpperCase()
 
-            let mensajeDNI = "👉 Ingresá su número de DNI"
-            let seleccionDNI
-            let esDNIValido
-            let dni
+            // Solicitar apellido
+            let mensajeApellido = "👉 Ingresá el apellido del nuevo usuario" // mensaje que se usará en el prompt de la función validadora
+            let apellido = obtenerTextoValido(mensajeApellido) //ejecuta una función que incluye el prompt para solicitar el dato y su validación
+            if (apellido === null) { break } // interrumpe ejecución si se ha cancelado
 
-            do {
+            // Solicitar nombre
+            let mensajeNombre = "👉 Ingresá su nombre de pila"
+            let nombre = obtenerTextoValido(mensajeNombre)
+            if (nombre === null) { break }
 
-                seleccionDNI = prompt(mensajeDNI)
+            //Solicitar DNI
+            dni = obtenerDocumentoValido()
+            if (dni === null) { break }
+            if (usuarios.find(usuario => usuario.DNI === dni)) {
+                alert("❌ Operación cancelada. Ya hay un usuario con este DNI. Por favor, no ingreses dos veces a un mismo usuario.")
+                break
+            }
 
-                let resultadoDNI = validacionDeEleccionSinArray(seleccionDNI, 10_000_000, 99_999_999)
-
-                esDNIValido = resultadoDNI.esValido
-
-                dni = Number(resultadoDNI.Valor)
-
-                if (!esDNIValido) {
-                    alert("❌ Lo sentimos. No ingresaste un valor válido.")
-                }
-
-            } while (!esDNIValido)
-
-            let agregarUsuario = (apellido, nombre, dni) => { usuarios.push({ Apellido: apellido, Nombre: nombre, DNI: dni }) }
+            // Generar registro
+            let agregarUsuario = (apellido, nombre, dniIngresado) => { usuarios.push({ Apellido: apellido, Nombre: nombre, DNI: dni }) }
 
             agregarUsuario(apellido, nombre, dni)
 
             alert(`✅ Se ha agregado a ${nombre} ${apellido} al registro de usuarios. Usaremos su número de DNI como número de socio: ${dni}`)
-
-            console.log(usuarios)
 
             break
 
@@ -180,7 +224,7 @@ while (bandera) {
             } while (!esISBNValido)
 
             let ejemplar = libros.find(l => l.ISBN === isbn)
-            console.log(ejemplar)
+
 
             if (ejemplar) {
                 let libroDuplicado = Number(prompt(`🚨 Ya tenemos un libro con ese ISBN. Corroborá los datos ingresados: "${ejemplar.Título}" de ${ejemplar.Autor} (${ejemplar.ISBN}). Cantidad existente: ${ejemplar.Ejemplares} \n\n 👉¿Qué deseás hacer? \n\n 1- Agregar un nuevo ejemplar de este libro al catálogo \n 2- Cancelar`))
@@ -202,7 +246,7 @@ while (bandera) {
             if (!cantidad || isNaN(cantidad) || cantidad <= 0) {
                 cantidad = 1 // Asigna por defecto el valor 1 si el prompt queda vacío o es un valor no numérico
             }
-console.log(cantidad)
+
 
             let mensajeLocaciones = `🏛️ Seleccioná la locación en la que se encuentra guardado físicamente el libro, utilizando para ello el número de la opción correspondiente:\n`
             for (let i = 0; i < locaciones.length; i++) {
@@ -232,16 +276,16 @@ console.log(cantidad)
             agregarLibro()
 
             alert(`✅ Se ha agregado ${cantidad} ejemplar de ${titulo} de ${autor} a tu biblioteca en ${locacion}. Podrás prestarlo cuando quieras.`)
-            console.log(libros)
+
             break
 
         case 4: // Prestar
 
-            if (libros.length === 0 || usuarios.length === 0){
+            if (libros.length === 0 || usuarios.length === 0) {
                 alert("🧙‍♂️ No podemos hacer magia. 🪄 Para poder prestar un libro necesitarás, primero, ingresar libros en la biblioteca y registrar al menos un usuario.")
                 break
             }
-            
+
             let usuarioEncontrado = buscarUsuarioParaPrestar()
 
             if (!usuarioEncontrado) {
@@ -273,7 +317,7 @@ console.log(cantidad)
 
             let libro = libros.find(libro => libro.ISBN === isbn2)
 
-            console.log(libro)
+
 
             if (!libro) {
                 alert("❌ No tenemos un libro con ese ISBN. Corroborá los datos ingresados.")
@@ -285,7 +329,7 @@ console.log(cantidad)
 
             alert(`📕 Libro con ISBN ${libro.ISBN} encontrado:\n-Título: ${libro.Título}\n-Autor: ${libro.Autor}\n-Ejemplares: ${libro.Ejemplares}`)
 
-            console.log(libro)
+
 
             prestamoNro++
 
@@ -294,8 +338,8 @@ console.log(cantidad)
 
             fechaVencimiento.setDate(fechaVencimiento.getDate() + 7)
 
-           // Investigar cómo hacer toLocaleDateString("es-AR")
-           console.log(libro.Ejemplares)
+            // Investigar cómo hacer toLocaleDateString("es-AR")
+
             function prestarLibro() {
                 prestamos.push({
                     Código: prestamoNro,
@@ -307,9 +351,9 @@ console.log(cantidad)
                     Fecha: fechaPrestamo,
                     Vencimiento: fechaVencimiento
                 })
-                console.log(libro.Ejemplares)
+
                 libro.Ejemplares -= 1
-                console.log(libro.Ejemplares)
+
             }
 
             if (libro.Ejemplares >= 1) {
@@ -326,19 +370,17 @@ console.log(cantidad)
                 break
             }
 
-            console.log(prestamos)
-
             break
 
         case 5: // Devolver
-        //falta poner alerta si el valor ingresado es nulo
+            //falta poner alerta si el valor ingresado es nulo
             if (prestamos.length === 0) {
                 alert("⚠️ Para devolver un libro, primero debés prestarlo. Es cuestión de sentido común... 🧉")
                 break
-            } 
-                    
+            }
+
             let usuarioDevolver = buscarUsuarioParaDevolver()
-            
+
             if (!usuarioDevolver) {
                 break
             }
@@ -357,20 +399,16 @@ console.log(cantidad)
 
             let indiceDevolver = prestamos.findIndex(item => item.Código === Number(itemDevolver))
 
-            console.log(indiceDevolver)
-            console.log(libros)
-
             if (indiceDevolver !== -1) {
-                
+
                 let encontrarLibro = libros.findIndex(devolverEjemplar => devolverEjemplar.ISBN === Number(prestamos[indiceDevolver].ISBN))
                 libros[encontrarLibro].Ejemplares++
-                
+
                 prestamos.splice(indiceDevolver, 1)
-                
-                console.log(libros)
+
                 alert(`✅ ¡Libro devuelto!`)
             }
-            
+
 
 
 
@@ -383,7 +421,7 @@ console.log(cantidad)
                 alert("Por el momento, nada que mostrar aquí 👀. No hay libros prestados a domicilio. Volvé más tarde.")
                 break
             } else {
-                
+
                 let mensajePrestamos = `📚 Los libros prestados son:\n`
 
                 for (let i = 0; i < prestamos.length; i++) {
@@ -409,7 +447,7 @@ console.log(cantidad)
                 mensajeAtrasados += `\n📌 Usuario: ${atrasados[i].Nombre} (DNI ${atrasados[i].Usuario} \n📕 Titulo: "${atrasados[i].Título}" de ${atrasados[i].Autor} \n📅 Vencimiento: ${atrasados[i].Vencimiento} \n______________________________________________________`
             }
 
-            if (atrasados.length != 0){
+            if (atrasados.length != 0) {
                 alert(mensajeAtrasados)
             } else {
                 alert("👮 De momento todo está en orden. No hay préstamos atrasados. Pero nos mantendremos vigilantes...")
