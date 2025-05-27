@@ -5,8 +5,9 @@ let locaciones = []
 let prestamos = []
 let prestamoNro = 0
 
-function crearLocacion(locacion) {
+function crearLocacion(locacion) {   
     locaciones.push(locacion)
+    alert(`✅ Se ha incorporado "${locacion}" como una nueva locación. A partir de ahora, podrás guardar libros ahí.`)
 }
 
 function validacionDeEleccionConArray(valor, array) {
@@ -28,11 +29,39 @@ function validacionDeEleccionSinArray(valor, piso = 0, techo = Infinity) {
 
 
 function validacionDeISBN(valor, piso = 10, techo = 13) {
+    if (valor === null) {return null}
     valor = valor.trim()
     valor = valor.replace(/\D/g, "") // uso regex para normalizar el dato, quitando todo lo que no sea número
     let esValido = valor !== null && valor !== "" && !isNaN(valor) && valor.length >= piso && valor.length <= techo
     return { Valor: valor, esValido: esValido }
 }
+
+function obtenerISBNValido() {
+    let mensajeISBN = "➡️ Ingresá el código ISBN del libro (es un número entre 10 y 13 dígitos)"
+    let seleccionISBN, esISBNValido, isbn
+
+    do {
+        seleccionISBN = prompt(mensajeISBN)
+
+        if (seleccionISBN === null) {
+            alert("🚪 Operación cancelada.")
+            return null
+        }
+
+        let resultadoISBN = validacionDeISBN(seleccionISBN)
+
+        esISBNValido = resultadoISBN.esValido
+        isbn = Number(resultadoISBN.Valor)
+
+        if (!esISBNValido) {
+            alert("❌ Lo sentimos. No ingresaste un valor válido.")
+        }
+
+    } while (!esISBNValido)
+
+    return isbn
+}
+
 
 function buscarUsuarioParaPrestar() {
 
@@ -155,14 +184,9 @@ while (bandera) {
             break
 
         case 1: // Crear lugar de guardado
-            let mensaje = prompt("🏛️ ¿Cómo se llaman la nueva locación?")
-
-            // acá hay que hacer que no deje guardar en blanco
-
-            crearLocacion(mensaje)
-
-            alert(`✅ Se ha incorporado "${mensaje}" como una nueva locación. A partir de ahora, podrás guardar libros ahí.`)
-
+            let mensajeLocacion = "🏛️ ¿Cómo se llaman la nueva locación?"
+            let locacion = obtenerTextoValido(mensajeLocacion)
+            if (locacion === null) { break } else {crearLocacion(locacion)}
             break
 
         case 2: // Crear usuario
@@ -201,27 +225,9 @@ while (bandera) {
                 break
             }
 
-            let mensajeISBN = "👉 Ingresá el código ISBN del libro (es un número entre 10 y 13 digitos)"
-            let seleccionISBN
-            let esISBNValido
-            let isbn
+            let isbn = obtenerISBNValido()
 
-            do {
-
-                seleccionISBN = prompt(mensajeISBN)
-                2
-                let resultadoISBN = validacionDeISBN(seleccionISBN)
-
-                esISBNValido = resultadoISBN.esValido
-
-                isbn = Number(resultadoISBN.Valor)
-
-
-                if (!esISBNValido) {
-                    alert("❌ Lo sentimos. No ingresaste un valor válido.")
-                }
-
-            } while (!esISBNValido)
+            if (isbn === null){break}
 
             let ejemplar = libros.find(l => l.ISBN === isbn)
 
@@ -239,9 +245,15 @@ while (bandera) {
 
                 break
             }
+          
+            let mensajeTitulo = "➡️Ingresá el título de la obra"
+            let titulo = obtenerTextoValido(mensajeTitulo)
+            if (titulo === null){break}
 
-            let titulo = prompt("➡️Ingresá el título de la obra").toUpperCase()
-            let autor = prompt("🧑‍💼Indicá el nombre completo del autor").toUpperCase()
+            let mensajeAutor = "🧑‍💼Indicá el nombre completo del autor"
+            let autor = obtenerTextoValido(mensajeAutor) 
+            if (autor === null){break}
+
             let cantidad = Number(prompt("🧮 Cantidad de nuevos ejemplares a ingresar"))
             if (!cantidad || isNaN(cantidad) || cantidad <= 0) {
                 cantidad = 1 // Asigna por defecto el valor 1 si el prompt queda vacío o es un valor no numérico
@@ -268,14 +280,15 @@ while (bandera) {
             } while (!esLocacionValida(seleccionDeLocacion)) // muestra error y vuelve siempre al prompt de selección de locación hasta tanto el valor ingresado satisfaga la validación de la funcion esLocacionValida
 
             seleccionDeLocacion = Number(seleccionDeLocacion) // me aseguro de que el valor ingresado no sea leído como string
-            locacion = locaciones[seleccionDeLocacion] // uso el valor del número ingresado como índice para recuperar la locación del array locacionbes y seteo la variable correspondiente con el valor que corresponde
+
+            let locacionLibro = locaciones[seleccionDeLocacion] // uso el valor del número ingresado como índice para recuperar la locación del array locacionbes y seteo la variable correspondiente con el valor que corresponde
 
 
-            let agregarLibro = () => { libros.push({ Autor: autor, Título: titulo, ISBN: isbn, Ejemplares: cantidad, Locación: locacion }) }
+            let agregarLibro = () => { libros.push({ Autor: autor, Título: titulo, ISBN: isbn, Ejemplares: cantidad, Locación: locacionLibro}) }
 
             agregarLibro()
 
-            alert(`✅ Se ha agregado ${cantidad} ejemplar de ${titulo} de ${autor} a tu biblioteca en ${locacion}. Podrás prestarlo cuando quieras.`)
+            alert(`✅ Se ha agregado ${cantidad} ejemplar de ${titulo} de ${autor} a tu biblioteca en ${locacionLibro}. Podrás prestarlo cuando quieras.`)
 
             break
 
@@ -291,31 +304,10 @@ while (bandera) {
             if (!usuarioEncontrado) {
                 break
             }
-            //Acá no entiendo el scope. Si las variables están encapsuladas dentro de case no tendria que haber problema con que tengan el mismo nombre que en otro lugar. Sin embargo, no se ejecuta nada si lo hago así
-            let mensajeISBN2 = "➡️ Ingresá el código ISBN del libro (es un número entre 10 y 13 digitos)"
-            let seleccionISBN2
-            let esISBNValido2
-            let isbn2
 
-            do {
+            let isbnDevolver = obtenerISBNValido()
 
-                seleccionISBN2 = prompt(mensajeISBN2)
-
-                let resultadoISBN2 = validacionDeISBN(seleccionISBN2)
-
-                esISBNValido2 = resultadoISBN2.esValido
-
-                isbn2 = Number(resultadoISBN2.Valor)
-
-
-                if (!esISBNValido2) {
-                    alert("❌ Lo sentimos. No ingresaste un valor válido.")
-                }
-
-            } while (!esISBNValido2)
-
-
-            let libro = libros.find(libro => libro.ISBN === isbn2)
+            let libro = libros.find(libro => libro.ISBN === isbnDevolver)
 
 
 
@@ -402,18 +394,14 @@ while (bandera) {
             if (indiceDevolver !== -1) {
 
                 let encontrarLibro = libros.findIndex(devolverEjemplar => devolverEjemplar.ISBN === Number(prestamos[indiceDevolver].ISBN))
-                libros[encontrarLibro].Ejemplares++
+                
+                libros[encontrarLibro].Ejemplares++ // suma un ejemplar  cuando el libro es devuelto
 
                 prestamos.splice(indiceDevolver, 1)
 
                 alert(`✅ ¡Libro devuelto!`)
             }
 
-
-
-
-
-            // sumar de nuevo el libro al inventario 
             break
 
         case 6: // Ver préstamos
